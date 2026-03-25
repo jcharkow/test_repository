@@ -56,3 +56,6 @@ jobs:
                 body: body
               });
             }
+
+      - name: Debug association
+        run: echo "Association=${{ steps.contributor.outputs.association }}"
