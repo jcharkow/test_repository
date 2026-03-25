@@ -18,79 +18,40 @@ jobs:
         id: contributor
         run: |
           if [ "${{ github.event_name }}" == "pull_request" ]; then
-            USERNAME="${{ github.event.pull_request.user.login }}"
-            IS_FIRST_CONTRIBUTION="${{ github.event.pull_request.author_association == 'FIRST_TIME_CONTRIBUTOR' }}"
+            echo "username=${{ github.event.pull_request.user.login }}" >> $GITHUB_OUTPUT
+            echo "association=${{ github.event.pull_request.author_association }}" >> $GITHUB_OUTPUT
           else
-            USERNAME="${{ github.event.issue.user.login }}"
-            IS_FIRST_CONTRIBUTION="${{ github.event.issue.author_association == 'FIRST_TIME_CONTRIBUTOR' }}"
+            echo "username=${{ github.event.issue.user.login }}" >> $GITHUB_OUTPUT
+            echo "association=${{ github.event.issue.author_association }}" >> $GITHUB_OUTPUT
           fi
-          echo "username=$USERNAME" >> $GITHUB_OUTPUT
-          echo "is_first_contribution=$IS_FIRST_CONTRIBUTION" >> $GITHUB_OUTPUT
 
-      - name: Add label to PR
-        if: github.event_name == 'pull_request'
+      - name: Welcome Contributor
         uses: actions/github-script@v7
         with:
           script: |
-            // const isFirstContribution = '${{ steps.contributor.outputs.is_first_contribution }}' === 'FIRST_TIME_CONTRIBUTOR';
-            const isFirstContribution = true
+            const association = '${{ steps.contributor.outputs.association }}';
+            const username = '${{ steps.contributor.outputs.username }}';
+            const eventName = context.eventName;
             
-            if (isFirstContribution) {
-              github.rest.issues.addLabels({
+            // FIRST_TIME_CONTRIBUTOR means they have never had a PR merged in this repo
+            if (association === 'FIRST_TIME_CONTRIBUTOR') {
+              
+              // 1. Add Label
+              await github.rest.issues.addLabels({
                 issue_number: context.issue.number,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 labels: ['new contributor']
               });
-            }
 
-      - name: Comment on PR
-        if: github.event_name == 'pull_request'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            // const isFirstContribution = '${{ steps.contributor.outputs.is_first_contribution }}' === 'FIRST_TIME_CONTRIBUTOR';
-            const isFirstContribution = true
-            
-            if (isFirstContribution) {
-              github.rest.issues.createComment({
+              // 2. Post Comment
+              const type = eventName === 'pull_request' ? 'PR' : 'issue';
+              const body = `Welcome @${username} and thank you for your contribution to OpenMS! To help us better understand our userbase and contributors, we would appreciate if you could complete the survey at the link below. Completing this survey will help us get to your ${type} sooner. Thank you for your participation!\n\n[Survey](https://tally.so/r/pbV6Qq)`;
+
+              await github.rest.issues.createComment({
                 issue_number: context.issue.number,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                body: `Welcome @${{ steps.contributor.outputs.username }} and thank you for your contribution to OpenMS! To help us better understand our userbase and contributors, we would appreciate if you could complete the survey at the link below. Completing this survey will help us get to your PR sooner. Thank you for your participation!\n\n[Survey](https://tally.so/r/pbV6Qq) `
-              });
-            }
-
-      - name: Add label to Issue
-        if: github.event_name == 'issues'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            // const isFirstContribution = '${{ steps.contributor.outputs.is_first_contribution }}' === 'FIRST_TIME_CONTRIBUTOR';
-            const isFirstContribution = true
-            
-            if (isFirstContribution) {
-              github.rest.issues.addLabels({
-                issue_number: context.issue.number,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                labels: ['new contributor']
-              });
-            }
-
-      - name: Comment on Issue
-        if: github.event_name == 'issues'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            // const isFirstContribution = '${{ steps.contributor.outputs.is_first_contribution }}' === 'FIRST_TIME_CONTRIBUTOR';
-            const isFirstContribution = true
-            
-            if (isFirstContribution) {
-              github.rest.issues.createComment({
-                issue_number: context.issue.number,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                body: `Welcome @${{ steps.contributor.outputs.username }} and thank you for your contribution to OpenMS! To help us better understand our userbase and contributors, we would appreciate if you could complete the survey at the link below. Completing this survey will help us get to your issue sooner. Thank you for your participation!\n\n[Survey](https://tally.so/r/pbV6Qq)`
+                body: body
               });
             }
