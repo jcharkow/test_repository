@@ -33,8 +33,8 @@ jobs:
             const username = '${{ steps.contributor.outputs.username }}';
             const eventName = context.eventName;
             
-            // FIRST_TIME_CONTRIBUTOR means they have never had a PR merged in this repo
-            //if (association === 'FIRST_TIME_CONTRIBUTOR') {
+            // NONE means they have never had a PR merged in this repo
+            //if (association === 'NONE') {
             if (true) {
               
               // 1. Add Label
