@@ -34,6 +34,8 @@ jobs:
             const eventName = context.eventName;
             
             // NONE means they have never had a PR merged in this repo
+            // another implementation https://github.com/llvm/llvm-project/blob/c8655fce45af6f2c13285f218bba83d39c84d5a4/.github/workflows/new-prs.yml
+            // https://github.com/llvm/llvm-project/blob/c8655fce45af6f2c13285f218bba83d39c84d5a4/.github/workflows/new-issues.yml
             //if (association === 'NONE') {
             if (true) {
               
