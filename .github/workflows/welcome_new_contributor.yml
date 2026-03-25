@@ -34,7 +34,8 @@ jobs:
             const eventName = context.eventName;
             
             // FIRST_TIME_CONTRIBUTOR means they have never had a PR merged in this repo
-            if (association === 'FIRST_TIME_CONTRIBUTOR') {
+            //if (association === 'FIRST_TIME_CONTRIBUTOR') {
+            if (true) {
               
               // 1. Add Label
               await github.rest.issues.addLabels({
