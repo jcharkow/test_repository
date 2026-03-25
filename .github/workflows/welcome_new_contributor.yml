@@ -32,6 +32,9 @@ jobs:
             const association = '${{ steps.contributor.outputs.association }}';
             const username = '${{ steps.contributor.outputs.username }}';
             const eventName = context.eventName;
+            const issueNumber = eventName === 'pull_request'
+              ? context.payload.pull_request.number
+              : context.issue.number;
             
             // NONE means they have never had a PR merged in this repo
             // another implementation https://github.com/llvm/llvm-project/blob/c8655fce45af6f2c13285f218bba83d39c84d5a4/.github/workflows/new-prs.yml
@@ -40,7 +43,7 @@ jobs:
               
               // 1. Add Label
               await github.rest.issues.addLabels({
-                issue_number: context.issue.number,
+                issue_number: issueNumber,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 labels: ['new contributor']
@@ -51,7 +54,7 @@ jobs:
               const body = `Welcome @${username} and thank you for your contribution to OpenMS! To help us better understand our userbase and contributors, we would appreciate if you could complete the survey at the link below. Completing this survey will help us get to your ${type} sooner. Thank you for your participation!\n\n[Survey](https://tally.so/r/pbV6Qq)`;
 
               await github.rest.issues.createComment({
-                issue_number: context.issue.number,
+                issue_number: issueNumber,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 body: body
